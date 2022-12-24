@@ -72,7 +72,7 @@ class _OverBoardState extends State<OverBoard> with TickerProviderStateMixin {
   late OverBoardAnimator _animator;
 
   ScrollController _scrollController = new ScrollController();
-  double _bulletPadding = 5.0, _bulletSize = 10.0, _bulletContainerWidth = 0;
+  double _bulletPadding = 3.0, _bulletSize = 7.0, _bulletContainerWidth = 0;
 
   int _counter = 0, _last = 0;
   int _total = 0;
@@ -111,7 +111,7 @@ class _OverBoardState extends State<OverBoard> with TickerProviderStateMixin {
         if (e is RawKeyDownEvent) {
           if (e.isKeyPressed(LogicalKeyboardKey.arrowRight) &&
               _counter < _total - 1) {
-            _next();
+            _goForward();
           } else if (e.isKeyPressed(LogicalKeyboardKey.arrowLeft) &&
               _counter > 0) {
             _goBack();
@@ -126,16 +126,13 @@ class _OverBoardState extends State<OverBoard> with TickerProviderStateMixin {
     return Listener(
       onPointerSignal: (event) async {
         if (event is PointerScrollEvent) {
-          num scrollDelta = event.scrollDelta.dy;
-          if (scrollDelta == 0) {
-            scrollDelta = event.scrollDelta.dx;
-          }
+          final scrollDelta = event.scrollDelta.dy;
           if (!isScrolling) {
             isScrolling = true;
             if (scrollDelta.isNegative && _counter > 0) {
               _goBack();
             } else if (!scrollDelta.isNegative && _counter < _total - 1) {
-              _next();
+              _goForward();
             }
 
             await Future.delayed(scrollDuration);
@@ -163,7 +160,7 @@ class _OverBoardState extends State<OverBoard> with TickerProviderStateMixin {
         if (distance > 1 && _counter > 0) {
           _goBack();
         } else if (distance < 0 && _counter < _total - 1) {
-          _next();
+          _goForward();
         }
       },
       child: Stack(
@@ -319,11 +316,18 @@ class _OverBoardState extends State<OverBoard> with TickerProviderStateMixin {
     );
   }
 
+  _goForward() {
+    setState(() {
+      _counter++;
+      _swipeDirection = SwipeDirection.RIGHT_TO_LEFT;
+    });
+    _animate();
+  }
+
   _goBack() {
     setState(() {
-      _swipeDirection = SwipeDirection.LEFT_TO_RIGHT;
-      _last = _counter;
       _counter--;
+      _swipeDirection = SwipeDirection.LEFT_TO_RIGHT;
     });
     _animate();
   }
